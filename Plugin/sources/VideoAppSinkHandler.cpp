@@ -265,14 +265,12 @@ GstFlowReturn VideoAppSinkHandler::process_sample(
       printf("%d\n", meta->info->size);
     }
   }
-
   GstVideoInfo vinfo = getVideoInfo(sample.get());
   video::EPixelFormat fmt = getVideoFormat(vinfo.finfo->format);
   m_pixelFormat = fmt;
   if (fmt == video::EPixel_Unkown) {
     return GST_FLOW_ERROR;
   }
-
   bool RGBFormat = true;
   int height = vinfo.height;
   if (fmt == video::EPixel_I420) {
@@ -292,14 +290,16 @@ GstFlowReturn VideoAppSinkHandler::process_sample(
   if (m_pixels[0].data.imageData &&
       (m_pixels[0].data.Size.x != vinfo.width ||
        m_pixels[0].data.Size.y != height || m_pixels[0].data.format != fmt)) {
-    if (preroll) {
-      m_IsAllocated = false;
-      m_pixels[0].data.clear();
-      m_backPixels[0].data.clear();
-    } else {
-      // don't process this buffer
-      return GST_FLOW_OK;
-    }
+       m_IsAllocated = false;
+       m_pixels[0].data.clear();
+       m_backPixels[0].data.clear();
+//     if (preroll) {
+//       m_IsAllocated = false;
+//       m_pixels[0].data.clear();
+//       m_backPixels[0].data.clear();
+//     } else {
+//         return GST_FLOW_OK;
+//     }
   }
 
   gst_buffer_map(_buffer, &mapinfo, GST_MAP_READ);
@@ -409,26 +409,26 @@ GstFlowReturn VideoAppSinkHandler::process_sample(
   ++m_samplesCount;
   return GST_FLOW_OK;
 }
-bool VideoAppSinkHandler::_Allocate(int width, int height,
-                                    video::EPixelFormat fmt) {
-  if (m_IsAllocated) return true;
+                                    
+bool VideoAppSinkHandler::_Allocate(int width, int height, video::EPixelFormat fmt) {
+    if (m_IsAllocated) {
+      return true;
+    }
+    m_frameSize.x = width;
+    m_frameSize.y = height;
+    m_pixels[0].data.createData(Vector2d(width, height), fmt);
+    m_backPixels[0].data.createData(Vector2d(width, height), fmt);
 
-  m_frameSize.x = width;
-  m_frameSize.y = height;
+    m_HavePixelsChanged = false;
+    m_BackPixelsChanged = true;
+    m_IsAllocated = true;
 
-  m_pixels[0].data.createData(Vector2d(width, height), fmt);
-  m_backPixels[0].data.createData(Vector2d(width, height), fmt);
+    m_frameCount = 0;
+    m_timeAcc = 0;
+    m_lastT = 0;
+    m_captureFPS = 0;
 
-  m_HavePixelsChanged = false;
-  m_BackPixelsChanged = true;
-  m_IsAllocated = true;
-
-  m_frameCount = 0;
-  m_timeAcc = 0;
-  m_lastT = 0;
-  m_captureFPS = 0;
-
-  return m_IsAllocated;
+    return m_IsAllocated;
 }
 
 bool VideoAppSinkHandler::GrabFrame() {
