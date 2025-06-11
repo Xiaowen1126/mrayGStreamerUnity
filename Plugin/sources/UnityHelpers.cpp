@@ -27,6 +27,7 @@ FuncFloatRetPtr GetEngineTimePtr;
 
 void LogMessage(const std::string& msg, ELogLevel level)
 {
+    // 禁用日志输出——直接返回
 	std::string m;
 	if (level == ELL_INFO)
 		m = "Info: ";
@@ -85,6 +86,7 @@ LogManager::LogManager()
 {
     logFilePath = DetermineLogFilePath("GStreamerLog.txt");
 
+    return;
 	// empty log
 	m_logFile = fopen(logFilePath.c_str(), "w");
 	if (m_logFile)
@@ -103,6 +105,7 @@ LogManager::~LogManager()
 }
 void LogManager::LogMessage(const std::string& msg)
 {
+    return;
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
     std::string end_ctime(std::ctime(&end_time));

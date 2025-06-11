@@ -1,0 +1,13 @@
+prefix=C:/projects/repos/cerbero.git/1.20/build/dist/msvc_x86_64
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: wavpack
+Description: wavpack library
+Version: 5.2.0
+Requires:
+Conflicts:
+Libs: -L${libdir} -lwavpack
+Libs.private: 
+Cflags: -I${includedir}
